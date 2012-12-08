@@ -237,11 +237,14 @@ class module_commands(cmd.Cmd):
     This is the module commands class that handles all the commands
     when a module is loaded
     '''
-    doc_header = "zro commands (type help <command>):"
+    doc_header = "webstrike commands (type help <command>):"
     nohelp = "*** No help on %s??"
     
     def print_error(self, text):
         print "%s%s%s" % (bcolors.FAIL, text, bcolors.ENDC)
+        
+    def print_success(self, text):
+        print "%s%s%s" % (bcolors.OKPURPLE, text, bcolors.ENDC)
         
     def initialize(self, path, filename, payloads):
         
@@ -254,7 +257,7 @@ class module_commands(cmd.Cmd):
         self.load_module         = None
         self.load_payload_module = None
         self.loaded_payload      = None
-        self.show_module_options = ["options", "advanced", "payloads"]
+        self.show_module_options = ["options", "opt", "advanced", "adv", "payloads", "pay"]
         self.module_type         = ""
         # list of available payloads
         self.payloads            = payloads
@@ -289,7 +292,7 @@ class module_commands(cmd.Cmd):
         # update the base exploit class
         self.module_type = mtype
         
-        if mtype == "exp":
+        if mtype.lower() == "exp" or mtype.lower() == "exploits":
             try:
                 self.loaded_module = self.load_module.exploit()
             except:
@@ -363,36 +366,42 @@ class module_commands(cmd.Cmd):
         if " " in line:
             param = line.split(" ")[0]
             value = line.split(" ")[1]
-            
+                    
             # if the payload is set as well as the exploit module
             if self.loaded_payload:
-                                # if its an advanced option:
-                if param.lower() in self.loaded_module.adv_params:
-                    print "\n%s => %s\n" % (param, value)
-                    self.loaded_module.adv_params[param.lower()][0] = value
-                    #return True
                 
-                self.loaded_payload.update_opt_param_list()    
-                updated_opt_param_list = self.loaded_payload.opt_param_list + self.loaded_module.opt_param_list
-            
-            # if the exploit, payload or auxiliary module is loaded only
-            elif not self.loaded_payload:
-                
-                # if its an advanced option:
                 if param.lower() in self.loaded_module.adv_params:
-                    print "\n%s => %s\n" % (param, value)
-                    
-                    print param.lower() 
+                    self.print_success("\n%s => %s\n" % (param, value))
                     if param.lower() == "ssl":
                         self.loaded_module.adv_params[param.lower()][0] = self.str2bool(value)
                     else:
                         self.loaded_module.adv_params[param.lower()][0] = value
+                    #return True
+                    
+                self.loaded_payload.update_opt_param_list() 
                 
+                # append the payload advanced options   
+                updated_opt_param_list = self.loaded_payload.opt_param_list + self.loaded_module.opt_param_list
+            
+            # if the exploit, payload or auxiliary module is loaded only
+            elif not self.loaded_payload:
+
+                if param.lower() in self.loaded_module.opt_params:
+                    self.print_success("\n%s => %s\n" % (param, value))
+                    self.loaded_module.opt_params[param.lower()][0] = value
                 
+                if param.lower() in self.loaded_module.adv_params:
+                    self.print_success("\n%s => %s\n" % (param, value))
+                    if param.lower() == "ssl":
+                        self.loaded_module.adv_params[param.lower()][0] = self.str2bool(value)
+                    else:
+                        self.loaded_module.adv_params[param.lower()][0] = value
+                        
                 self.loaded_module.update_opt_param_list()
                 updated_opt_param_list = self.loaded_module.opt_param_list
             
             if value in self.payloads:
+                print "here??"
                 if param.lower() not in updated_opt_param_list and \
                     param.lower() not in self.loaded_module.adv_params:
                     self.print_error("\n(-) Invalid parameter '%s' for the set command, use 'help set' for more information\n" % (param))
@@ -406,22 +415,44 @@ class module_commands(cmd.Cmd):
                 
         elif " " not in line:
             if line.lower() not in self.loaded_module.opt_param_list:
-                self.print_error("\n(-) Invalid parameter '%s' for the set command, use 'help set' for more information\n" % (line))
+                self.print_error("\n(-) Invalid parameter '%s' for the set command, use 'help set' for more information" % (line))
             
-        
+
         if param == "payload" or param == "pay":
             if value in self.payloads:
                 self.import_payload_module(value)
             else:
-                self.print_error("\n(-) Invalid payload type\n")
+                self.print_error("\n(-) Invalid payload type")
         elif not param:
-            self.print_error("\n(-) Invalid payload type\n")
+            self.print_error("(-) unspecfied value for parameter '%s'\n" % line)
 
     # ok, lets exploit the target....  
     
-    def help_exploit(self, line):
-        print "exploit the target..."
-      
+    def help_exploit(self):
+        self.print_success("\n(+) Attempts to exploit the target using the current module and its settings\n")
+
+    def help_info(self):
+        self.print_success("\n(+) Displays module information and available options\n")
+        
+    def help_set(self):
+        self.print_success("\n(+) Sets an available option to a specified value\n")
+        
+    def help_show(self):
+        #self.print_success("\n(+) Shows the available options\n")
+        self.print_success("\n(+) show a specific set of options/modules/ using:\n")
+        for module_type in self.show_module_options:
+            self.print_success("\tshow %s" % (module_type))
+        self.print_success("")
+
+    def help_exit(self):
+        self.print_success("\n(+) Exits this loaded module\n")
+        
+    def help_help(self):
+        self.print_success("\n(+) Displays the available commands!\n")
+
+    def help_unload(self):
+        self.print_success("\n(+) Unloads the currently loaded module\n")
+        
     def do_exploit(self, line):
         
         derivedclass = str(type(self.loaded_module))
@@ -615,7 +646,8 @@ class core_commands(cmd.Cmd):
     when no module is loaded
     '''
 
-    doc_header = "zro commands (type help <command>):"
+    doc_header = "webstrike commands (type help <command> for usage):"
+    ruler = "%s-%s" % (bcolors.OKPURPLE, bcolors.ENDC)
     
     #http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python
     def is_number(self, s):
@@ -732,17 +764,18 @@ class core_commands(cmd.Cmd):
         return True
 
     def do_intro(self, line):
-        print '\nwelcome to zro'
-        print '================'
-        print 'zro is a framework for application specific web attacks and comes pre-packaged with'
-        print 'exploits and auxiliary modules targeting a variety of applications.'
-        print 'You can choose to develop modules or use the existing modules. If you are going to develop'
-        print 'modules then please build them to the guide specification docs/pwn.txt.\n'
+        print '\nwelcome to webstrike'
+        print '===================='
+        print 'webstrike is a framework for application specific web attacks and comes pre-packaged with'
+        print 'exploits and auxiliary modules targeting a variety of applications. It has a custom persistant'
+        print 'trojan called \'ronin\' which you can use to setup usermode rootkit. You can choose to develop' 
+        print 'modules or use the existing ones. If you are going to develop modules then please build them to'
+        print 'the specifications outlined in docs/DEVELOP.\n'
 
     def do_load(self, line):
 
         print ""
-        
+        """
         # load by number
         if self.is_number(line):
 
@@ -765,23 +798,27 @@ class core_commands(cmd.Cmd):
             i.import_exploit_module(module_type, module_path)
             
             i.cmdloop()
-            
+        """
         # load by name
-        elif not self.is_number(line):
-            if line in self.all_modules:
-                i = module_commands()
-                module_path = line.split("/")
-                module_name = module_path[-1]
-                module_type = module_path[1] # type will always be the same
+        #elif not self.is_number(line):
+        #print self.all_modules
+        mod_name = "modules/%s" % line
+        if mod_name in self.all_modules:
+            #if line in self.all_modules:
+            i = module_commands()
+            module_path = mod_name.split("/")
+            module_name = module_path[-1]
+            module_type = module_path[1] # type will always be the same
                         
-                i.prompt = self.prompt[:-3]+' %s(%s%s%s) > ' % \
-                (module_type, bcolors.OKBLUE, module_name, bcolors.ENDC)
+            i.prompt = self.prompt[:-3]+' %s(%s%s%s) > ' % \
+            (module_type, bcolors.OKBLUE, module_name, bcolors.ENDC)
                         
-                module_path.pop()
-                module_path = "/".join(module_path) + "/"
-                i.initialize(module_path, module_name, self.payload_modules)
-                i.import_exploit_module(module_type, module_path)
-                i.cmdloop()
+            module_path.pop()
+            module_path = "/".join(module_path) + "/"
+
+            i.initialize(module_path, module_name, self.payload_modules)
+            i.import_exploit_module(module_type, module_path)
+            i.cmdloop()
                 
         """
         print ""
@@ -861,7 +898,7 @@ class core_commands(cmd.Cmd):
         print "\n(+) exits from the console\n"
 
     def help_load(self):
-        print "\n(+) loads a module\n"
+        print "\n(+) loads a module by specifying the module name\n"
 
     def help_unload(self):
         print "\n(+) unloads a module\n"

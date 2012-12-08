@@ -2,6 +2,8 @@
 Created on Sep 17, 2012
 
 @author: aeon
+more colors here if needed
+http://www.siafoo.net/snippet/88
 '''
 
 class bcolors:
@@ -11,6 +13,8 @@ class bcolors:
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
+    OKPURPLE = '\033[1;35m'
+    #ENDC = '\033[1;m'
 
     def disable(self):
         self.HEADER = ''
