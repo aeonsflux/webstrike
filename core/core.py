@@ -238,7 +238,7 @@ class module_commands(cmd.Cmd):
     when a module is loaded
     '''
     doc_header = "webstrike commands (type help <command>):"
-    nohelp = "*** No help on %s??"
+    ruler = "%s-%s" % (bcolors.OKPURPLE, bcolors.ENDC)
     
     def print_error(self, text):
         print "%s%s%s" % (bcolors.FAIL, text, bcolors.ENDC)
@@ -646,9 +646,9 @@ class core_commands(cmd.Cmd):
     when no module is loaded
     '''
 
-    doc_header = "webstrike commands (type help <command> for usage):"
+    doc_header = "webstrike commands (type help <command>):"
     ruler = "%s-%s" % (bcolors.OKPURPLE, bcolors.ENDC)
-    
+        
     #http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python
     def is_number(self, s):
         try:
@@ -729,6 +729,9 @@ class core_commands(cmd.Cmd):
     def print_error(self, text):
         print "%s%s%s" % (bcolors.FAIL, text, bcolors.ENDC)
         
+    def print_success(self, text):
+        print "%s%s%s" % (bcolors.OKPURPLE, text, bcolors.ENDC)
+        
     # cleaner output    
     def default(self, line):
         """Called on an input line when the command prefix is not recognized.
@@ -774,31 +777,6 @@ class core_commands(cmd.Cmd):
 
     def do_load(self, line):
 
-        print ""
-        """
-        # load by number
-        if self.is_number(line):
-
-            module = self.all_modules[int(line)-1]
-            module_path = module.split("/")
-            
-            module_type = module_path[1]
-            module_name = module_path[-1]
-            
-            module_path.pop()
-            module_path = "/".join(module_path) + "/"
-
-            i = module_commands()
-
-            i.prompt = self.prompt[:-3]+' %s(%s%s%s) > ' % \
-                (module_type, bcolors.OKBLUE, module_name, bcolors.ENDC)
-            
-            i.initialize(module_path, module_name, self.payload_modules)
-            
-            i.import_exploit_module(module_type, module_path)
-            
-            i.cmdloop()
-        """
         # load by name
         #elif not self.is_number(line):
         #print self.all_modules
@@ -819,30 +797,6 @@ class core_commands(cmd.Cmd):
             i.initialize(module_path, module_name, self.payload_modules)
             i.import_exploit_module(module_type, module_path)
             i.cmdloop()
-                
-        """
-        print ""
-        for r,d,f in os.walk("modules"):
-            for files in f:
-                    full_path = os.path.join(r,files[:-3])
-                    if files.endswith(".py") and line == full_path:
-                        i = module_commands()
-                        module_path = full_path.split("/")
-                        module_name = module_path[-1]
-                        module_type = module_path[1] # type will always be the same
-                        
-                        
-                        i.prompt = self.prompt[:-3]+' %s(%s%s%s) > ' % \
-                        (module_type, bcolors.OKBLUE, module_name, bcolors.ENDC)
-                        
-                        
-                        module_path.pop()
-                        module_path = "/".join(module_path) + "/"
-                        i.initialize(module_path, module_name)
-                        i.import_exploit_module(module_path)
-                        i.cmdloop()
-                        
-        """
         
     def do_unload(self, line):
         return True
@@ -873,12 +827,7 @@ class core_commands(cmd.Cmd):
     # do help
     
     def help_intro(self):
-        print '\nwelcome to WebWiz'
-        print '================='
-        print 'WebWiz is a framework for application specific web attacks and comes pre-packaged with'
-        print 'exploits and auxiliary modules targeting a variety of applications.'
-        print 'You can choose to develop modules or use the existing modules. If you are going to develop'
-        print 'modules then please build them to the guide specification docs/pwn.txt.\n'
+        self.print_success("\n(+) Displays the introduction to webstrike\n")
         
         
     def help_search(self):
