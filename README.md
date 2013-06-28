@@ -1,7 +1,7 @@
 webstrike
 =========
 
-'webstrike' is a web infiltration framework. It is designed for remote intrusion against targeted webservers. It will have the ability to: 
+'webstrike' is aa web infiltration framework. It is designed for remote intrusion against targeted webservers. It will have the ability to: 
 
 - perform reconnaissance and information gathering against a target:
 	- fingerprint serverside technologies
