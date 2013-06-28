@@ -33,8 +33,4 @@ Screenshots
 ===========
 
 ![webstrike intro](https://github.com/aeonsflux/webstrike/raw/master/images/intro.png "webstrike intro")
-<<<<<<< HEAD
-test12
-=======
-test1
->>>>>>> 97fdd077202472a1a21d6f901f4b8fdfd5b5a405
+test123
