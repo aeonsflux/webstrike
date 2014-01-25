@@ -27,7 +27,7 @@ Setup
 
 Besides python, you will need to install the following prerequisites:
 
-- None for now :-)
+- None for now :-) 
 
 Screenshots
 ===========
